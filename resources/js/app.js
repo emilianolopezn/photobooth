@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initGuestEditor();
     initModerationDeck();
     initSettingsSlugPreview();
+    initGalleryLightbox();
 });
 
 const toastState = {
@@ -590,6 +591,63 @@ function initSettingsSlugPreview() {
 
     input.addEventListener('input', () => {
         target.textContent = input.value || 'invitados';
+    });
+}
+
+function initGalleryLightbox() {
+    const overlay = document.getElementById('gallery-lightbox');
+    const image = document.getElementById('gallery-lightbox-img');
+    const closeButton = document.getElementById('gallery-lightbox-close');
+    const triggers = document.querySelectorAll('[data-full-image]');
+
+    if (!overlay || !image || !triggers.length) {
+        return;
+    }
+
+    const open = (src) => {
+        image.src = src;
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const close = () => {
+        overlay.classList.add('hidden');
+        image.src = '';
+        document.body.style.overflow = '';
+    };
+
+    triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => open(trigger.dataset.fullImage));
+    });
+
+    closeButton?.addEventListener('click', close);
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            close();
+        }
+    });
+
+    let startX = 0;
+    let startY = 0;
+    overlay.addEventListener('touchstart', (event) => {
+        const touch = event.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+    });
+
+    overlay.addEventListener('touchend', (event) => {
+        const touch = event.changedTouches[0];
+        const diffX = touch.clientX - startX;
+        const diffY = touch.clientY - startY;
+        if (Math.sqrt(diffX ** 2 + diffY ** 2) > 60) {
+            close();
+        }
+    });
+
+    window.addEventListener('keyup', (event) => {
+        if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+            close();
+        }
     });
 }
 

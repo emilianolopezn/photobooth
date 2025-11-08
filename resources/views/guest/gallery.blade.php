@@ -27,7 +27,13 @@
                 </div>
                 <div class="grid grid-cols-3 gap-1">
                     @forelse ($photos as $photo)
-                        <img src="{{ Storage::disk('public')->url($photo->thumb_path ?? $photo->image_path) }}" alt="Foto {{ $photo->id }}" loading="lazy" class="aspect-square object-cover rounded-xl shadow-soft">
+                        @php
+                            $fullUrl = Storage::disk('public')->url($photo->image_path);
+                            $thumbUrl = Storage::disk('public')->url($photo->thumb_path ?? $photo->image_path);
+                        @endphp
+                        <button type="button" class="gallery-thumb" data-full-image="{{ $fullUrl }}" aria-label="Ver foto completa">
+                            <img src="{{ $thumbUrl }}" alt="Foto {{ $photo->id }}" loading="lazy" class="aspect-square object-cover rounded-xl shadow-soft">
+                        </button>
                     @empty
                         <p class="col-span-3 text-center text-sm text-boho-brown/70 py-6">Aún no hay fotos. ¡Sé la primera persona en compartir!</p>
                     @endforelse
@@ -35,6 +41,15 @@
             </div>
         @endif
     </section>
+
+    <div id="gallery-lightbox" class="gallery-overlay hidden">
+        <button type="button" id="gallery-lightbox-close" class="gallery-close" aria-label="Cerrar galería">
+            <span>&times;</span>
+        </button>
+        <div class="gallery-overlay-content">
+            <img id="gallery-lightbox-img" src="" alt="Foto seleccionada" class="gallery-full-image">
+        </div>
+    </div>
 
     <a href="{{ route('guest.editor', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab" aria-label="Abrir editor">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
