@@ -9,7 +9,7 @@
         <div class="rounded-3xl bg-gradient-to-br from-terracotta/90 to-brown/90 p-6 text-cream shadow-soft">
             <p class="text-xs uppercase tracking-[0.3em] text-cream/80">Photo Booth</p>
             <h1 class="text-3xl font-semibold mt-2">{{ $settings->event_title }}</h1>
-            <p class="mt-4 text-sm">Estilo boho chic para capturar recuerdos íntimos. Personaliza tu foto, agrega stickers y comparte la vibra del día.</p>
+            <p class="mt-4 text-sm">Construyamos juntos un jardín de recuerdos: compartan sus fotografías para que cada mirada, cada risa y cada abrazo se unan en un mismo álbum de eternidad. (Sube las fotos, ¡no te hagas wey!)</p>
         </div>
 
         @if (! $settings->gallery_active)

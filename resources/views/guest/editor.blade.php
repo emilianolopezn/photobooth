@@ -80,6 +80,15 @@
                                 <button type="button" class="color-dot {{ $loop->first ? 'active' : '' }}" style="background: {{ $color }}" data-color="{{ $color }}"></button>
                             @endforeach
                         </div>
+                        <div class="space-y-1">
+                            <label class="form-label text-xs uppercase">Color de borde</label>
+                            <div class="flex gap-2 flex-wrap">
+                                <button type="button" class="color-dot border-dot active" data-stroke="none">/</button>
+                                @foreach (['#FFFFFF', '#C86B5A', '#EADAC1', '#9BAE93', '#8C6A5D', '#000000'] as $color)
+                                    <button type="button" class="color-dot border-dot" style="background: {{ $color }}" data-stroke="{{ $color }}"></button>
+                                @endforeach
+                            </div>
+                        </div>
                         <div class="flex gap-2">
                             <button type="button" class="btn-secondary flex-1" data-action="add-text">Agregar texto</button>
                             <button type="button" class="btn-secondary flex-1" data-action="clear-text">Limpiar textos</button>

@@ -119,23 +119,28 @@ function initGuestEditor() {
     backgroundLayer.add(backgroundRect);
 
     let backgroundImage = null;
+    let activeTextNode = null;
 
     const state = {
         currentFilter: 'none',
         textColor: '#C86B5A',
+        textFont: "'Boho Script', cursive",
+        strokeColor: '#FFFFFF',
+        strokeWidth: 0,
     };
 
     const form = document.getElementById('editor-form');
     const cameraInput = document.getElementById('camera-input');
     const galleryInput = document.getElementById('gallery-input');
     const textInput = document.getElementById('text-input');
-    const colorDots = wrapper.querySelectorAll('.color-dot');
+    const colorDots = wrapper.querySelectorAll('[data-color]');
     const stickers = wrapper.querySelectorAll('[data-sticker]');
     const filterButtons = wrapper.querySelectorAll('[data-filter]');
     const actionButtons = wrapper.querySelectorAll('[data-action]');
     const hiddenImageInput = document.getElementById('image_data');
     const overlayInput = document.getElementById('overlay_json');
     const filtersInput = document.getElementById('applied_filters');
+    const strokeDots = wrapper.querySelectorAll('[data-stroke]');
     if (filtersInput) {
         filtersInput.value = JSON.stringify({ filter: 'none' });
     }
@@ -186,7 +191,34 @@ function initGuestEditor() {
             colorDots.forEach((item) => item.classList.remove('active'));
             dot.classList.add('active');
             state.textColor = dot.dataset.color || '#C86B5A';
+            applyStylesToText(activeTextNode);
+            elementsLayer.batchDraw();
         });
+    });
+
+    strokeDots.forEach((dot) => {
+        dot.addEventListener('click', () => {
+            strokeDots.forEach((item) => item.classList.remove('active'));
+            dot.classList.add('active');
+            if (dot.dataset.stroke === 'none') {
+                state.strokeWidth = 0;
+                state.strokeColor = '#FFFFFF';
+            } else {
+                state.strokeColor = dot.dataset.stroke || '#FFFFFF';
+                state.strokeWidth = 0.1;
+            }
+            applyStylesToText(activeTextNode);
+            elementsLayer.batchDraw();
+        });
+    });
+
+    elementsLayer.on('click tap', (event) => {
+        const target = event.target;
+        if (target && target.getClassName && target.getClassName() === 'Text') {
+            activeTextNode = target;
+        } else {
+            activeTextNode = null;
+        }
     });
 
     const isDataUrl = (value) => typeof value === 'string' && value.startsWith('data:');
@@ -232,6 +264,7 @@ function initGuestEditor() {
                 break;
             case 'clear-text':
                 elementsLayer.find('Text').forEach((node) => node.destroy());
+                activeTextNode = null;
                 elementsLayer.draw();
                 break;
             case 'reset-canvas':
@@ -245,6 +278,9 @@ function initGuestEditor() {
                 hiddenImageInput.value = '';
                 overlayInput.value = '';
                 filtersInput.value = JSON.stringify({ filter: 'none' });
+                state.textFont = "'Boho Script', cursive";
+                state.strokeWidth = 0;
+                state.strokeColor = '#FFFFFF';
                 break;
             case 'save':
                 saveCanvas();
@@ -264,15 +300,31 @@ function initGuestEditor() {
             text,
             x: stage.width() / 2 - 60,
             y: stage.height() / 2 - 30,
-            fontFamily: '"DM Sans", sans-serif',
+            fontFamily: state.textFont,
             fontSize: 32,
             fontStyle: '600',
-            fill: state.textColor,
             draggable: true,
         });
 
+        applyStylesToText(textbox);
+        activeTextNode = textbox;
         elementsLayer.add(textbox);
         elementsLayer.draw();
+    }
+
+    function applyStylesToText(node) {
+        if (!node) {
+            return;
+        }
+
+        node.fontFamily(state.textFont);
+        node.fill(state.textColor);
+        if (state.strokeWidth > 0) {
+            node.stroke(state.strokeColor);
+        } else {
+            node.stroke(null);
+        }
+        node.strokeWidth(state.strokeWidth);
     }
 
     function loadBackgroundImage(source) {
