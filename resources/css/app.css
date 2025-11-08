@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-cream text-boho-brown;
+    }
+}
+
+@layer components {
+    .card {
+        @apply rounded-3xl bg-white/80 p-5 shadow-soft backdrop-blur;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-2xl bg-terracotta px-4 py-3 font-semibold text-cream shadow-soft transition hover:bg-terracotta/90;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center rounded-2xl bg-beige px-4 py-3 font-medium text-boho-brown;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center rounded-2xl bg-rose-500 px-4 py-3 font-semibold text-white;
+    }
+
+    .metric-card {
+        @apply card space-y-1 text-center;
+    }
+
+    .metric-label {
+        @apply text-xs uppercase tracking-[0.3em] text-boho-brown/60;
+    }
+
+    .metric-value {
+        @apply text-3xl font-semibold;
+    }
+
+    .chip {
+        @apply inline-flex items-center rounded-full bg-cream px-4 py-2 text-sm font-medium text-boho-brown shadow-sm;
+    }
+
+    .chip.active {
+        @apply bg-terracotta text-cream;
+    }
+
+    .fab {
+        @apply fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-terracotta text-cream shadow-soft;
+    }
+
+    .input-pill {
+        @apply flex h-12 items-center justify-center rounded-2xl bg-beige text-sm font-medium text-boho-brown;
+    }
+
+    .form-label {
+        @apply text-sm font-medium text-boho-brown;
+    }
+
+    .form-input {
+        @apply w-full rounded-2xl border border-beige bg-white/70 px-4 py-3 text-boho-brown focus:border-terracotta focus:ring-terracotta;
+    }
+
+    .form-error {
+        @apply text-sm text-rose-500;
+    }
+
+    .tab-buttons {
+        @apply flex gap-2 rounded-2xl bg-beige/60 p-1;
+    }
+
+    .tab-button {
+        @apply flex-1 rounded-2xl px-3 py-2 text-sm font-medium text-boho-brown/70;
+    }
+
+    .tab-button.active {
+        @apply bg-white text-boho-brown shadow-soft;
+    }
+
+    .sticker-pill {
+        @apply flex min-w-[120px] flex-col items-center rounded-2xl bg-cream/60 p-3 text-center text-xs font-medium text-boho-brown;
+    }
+
+    .sticker-pill img {
+        @apply mb-2 h-16 w-16 object-contain;
+    }
+
+    .color-dot {
+        @apply h-10 w-10 rounded-full border-2 border-white shadow;
+    }
+
+    .color-dot.active {
+        @apply ring-4 ring-terracotta;
+    }
+
+    .switch {
+        @apply flex items-start gap-3 rounded-2xl border border-beige p-3;
+    }
+
+    .switch input {
+        @apply mt-1 h-5 w-5 rounded border-beige text-terracotta focus:ring-terracotta;
+    }
+
+    .switch span {
+        @apply text-sm font-medium;
+    }
+
+    .switch small {
+        @apply block text-xs font-normal text-boho-brown/70;
+    }
+
+    .status-pill {
+        @apply absolute left-2 top-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white;
+    }
+
+    .status-approved {
+        @apply bg-emerald-500;
+    }
+
+    .status-pending {
+        @apply bg-amber-500;
+    }
+
+    .status-rejected {
+        @apply bg-rose-500;
+    }
+
+    .admin-pill {
+        @apply rounded-full border border-cream/50 px-3 py-1 text-xs font-semibold text-cream/80;
+    }
+
+    .admin-pill.active {
+        @apply bg-cream text-terracotta;
+    }
+
+    .flyer-preview {
+        @apply rounded-[36px] bg-gradient-to-br from-cream via-beige to-terracotta/20 p-6 shadow-soft;
+    }
+
+    .flyer-top {
+        @apply text-center space-y-2;
+    }
+
+    .flyer-top h2 {
+        @apply text-3xl font-semibold text-brown;
+    }
+
+    .flyer-body {
+        @apply mt-6 rounded-3xl bg-white/70 p-6;
+    }
+
+    .flyer-tag {
+        @apply inline-flex rounded-full bg-terracotta/20 px-4 py-1 text-xs uppercase tracking-[0.3em];
+    }
+
+    .moderation-card .swipe-indicator {
+        @apply pointer-events-none absolute top-6 z-10 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-widest text-white opacity-0 transition;
+    }
+
+    .swipe-approve {
+        @apply left-4 bg-emerald-500/80;
+    }
+
+    .swipe-reject {
+        @apply right-4 bg-rose-500/80;
+    }
+
+    .swipe-indicator.visible {
+        @apply opacity-100;
+    }
+
+    .toast-bubble {
+        @apply rounded-2xl bg-brown px-4 py-3 text-center text-cream shadow-soft;
+    }
+
+    .toast-container {
+        @apply fixed bottom-6 left-1/2 z-50 -translate-x-1/2;
+    }
+}
