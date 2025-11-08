@@ -209,6 +209,30 @@
         @apply absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/40 text-white text-2xl;
     }
 
+    .gallery-download-btn {
+        @apply mx-auto mt-6 flex w-full max-w-xs items-center justify-center rounded-full bg-terracotta px-5 py-3 text-center text-sm font-semibold text-cream shadow-soft;
+    }
+
+    .gallery-counter {
+        @apply text-center text-sm text-white/80;
+    }
+
+    .gallery-nav {
+        @apply absolute top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white shadow-lg;
+    }
+
+    .gallery-nav svg {
+        @apply h-6 w-6;
+    }
+
+    .gallery-nav-prev {
+        @apply left-5;
+    }
+
+    .gallery-nav-next {
+        @apply right-5;
+    }
+
     .toast-bubble {
         @apply rounded-2xl bg-brown px-4 py-3 text-center text-cream shadow-soft;
     }

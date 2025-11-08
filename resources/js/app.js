@@ -598,14 +598,30 @@ function initGalleryLightbox() {
     const overlay = document.getElementById('gallery-lightbox');
     const image = document.getElementById('gallery-lightbox-img');
     const closeButton = document.getElementById('gallery-lightbox-close');
+    const downloadBtn = document.getElementById('gallery-download-btn');
+    const counter = document.getElementById('gallery-counter');
+    const nextButton = document.getElementById('gallery-next');
+    const prevButton = document.getElementById('gallery-prev');
     const triggers = document.querySelectorAll('[data-full-image]');
 
     if (!overlay || !image || !triggers.length) {
         return;
     }
 
+    let currentIndex = 0;
+
+    const updateCounter = () => {
+        if (!counter) return;
+        const total = triggers.length;
+        counter.textContent = `${currentIndex + 1}/${total}`;
+    };
+
     const open = (src) => {
         image.src = src;
+        if (downloadBtn) {
+            downloadBtn.href = src;
+        }
+        updateCounter();
         overlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     };
@@ -616,8 +632,24 @@ function initGalleryLightbox() {
         document.body.style.overflow = '';
     };
 
-    triggers.forEach((trigger) => {
-        trigger.addEventListener('click', () => open(trigger.dataset.fullImage));
+    const showImageAt = (index) => {
+        const total = triggers.length;
+        if (!total) return;
+        currentIndex = (index + total) % total;
+        const nextImage = triggers[currentIndex]?.dataset?.fullImage;
+        if (nextImage) {
+            open(nextImage);
+        }
+        updateCounter();
+    };
+
+    const showNext = () => showImageAt(currentIndex + 1);
+    const showPrev = () => showImageAt(currentIndex - 1);
+
+    triggers.forEach((trigger, index) => {
+        trigger.addEventListener('click', () => {
+            showImageAt(index);
+        });
     });
 
     closeButton?.addEventListener('click', close);
@@ -625,6 +657,10 @@ function initGalleryLightbox() {
         if (event.target === overlay) {
             close();
         }
+    });
+
+    downloadBtn?.addEventListener('click', (event) => {
+        event.stopPropagation();
     });
 
     let startX = 0;
@@ -640,14 +676,35 @@ function initGalleryLightbox() {
         const diffX = touch.clientX - startX;
         const diffY = touch.clientY - startY;
         if (Math.sqrt(diffX ** 2 + diffY ** 2) > 60) {
-            close();
+            if (diffX > 0) {
+                showPrev();
+            } else {
+                showNext();
+            }
         }
     });
 
     window.addEventListener('keyup', (event) => {
-        if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+        if (overlay.classList.contains('hidden')) return;
+        if (event.key === 'Escape') {
             close();
         }
+        if (event.key === 'ArrowRight') {
+            showNext();
+        }
+        if (event.key === 'ArrowLeft') {
+            showPrev();
+        }
+    });
+
+    nextButton?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showNext();
+    });
+
+    prevButton?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showPrev();
     });
 }
 

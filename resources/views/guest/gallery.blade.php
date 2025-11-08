@@ -46,8 +46,20 @@
         <button type="button" id="gallery-lightbox-close" class="gallery-close" aria-label="Cerrar galería">
             <span>&times;</span>
         </button>
+        <button type="button" id="gallery-prev" class="gallery-nav gallery-nav-prev" aria-label="Foto anterior">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+        <button type="button" id="gallery-next" class="gallery-nav gallery-nav-next" aria-label="Foto siguiente">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
         <div class="gallery-overlay-content">
             <img id="gallery-lightbox-img" src="" alt="Foto seleccionada" class="gallery-full-image">
+            <a id="gallery-download-btn" href="#" download class="gallery-download-btn mt-6">Descargar foto</a>
+            <p id="gallery-counter" class="gallery-counter mt-2">1/1</p>
         </div>
     </div>
 
