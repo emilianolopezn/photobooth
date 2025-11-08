@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Intervention Image (v3) Driver
+    |--------------------------------------------------------------------------
+    |
+    | We default to the GD driver to avoid requiring Imagick locally.
+    |
+    */
+
+    'image' => [
+        'driver' => env('IMAGE_DRIVER', 'gd'),
+    ],
+
 ];

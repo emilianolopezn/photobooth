@@ -25,7 +25,7 @@
                         <span>Elegir del álbum</span>
                     </label>
                 </div>
-                <canvas id="editor-canvas" class="w-full rounded-2xl bg-cream/70" height="480"></canvas>
+                <div id="editor-stage" class="w-full rounded-2xl bg-cream/70 min-h-[420px]"></div>
             </div>
 
             <input type="hidden" name="image_data" id="image_data">
@@ -44,7 +44,13 @@
 
                 <div class="tab-panel" data-panel="filters">
                     <div class="flex gap-2 overflow-x-auto">
-                        @foreach ([['label' => 'Original', 'filter' => 'none'], ['label' => 'Sepia', 'filter' => 'sepia'], ['label' => 'Gris', 'filter' => 'grayscale'], ['label' => 'Vintage', 'filter' => 'vintage'], ['label' => 'Cálido', 'filter' => 'warm']] as $filter)
+                        @foreach ([
+                            ['label' => 'Original', 'filter' => 'none'],
+                            ['label' => 'Sepia', 'filter' => 'sepia'],
+                            ['label' => 'Blanco y Negro', 'filter' => 'grayscale'],
+                            ['label' => 'Realce', 'filter' => 'enhance'],
+                            ['label' => 'Vintage', 'filter' => 'vintage'],
+                        ] as $filter)
                             <button type="button" class="chip {{ $loop->first ? 'active' : '' }}" data-filter="{{ $filter['filter'] }}">{{ $filter['label'] }}</button>
                         @endforeach
                     </div>

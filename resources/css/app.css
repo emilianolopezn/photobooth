@@ -38,7 +38,7 @@
     }
 
     .chip {
-        @apply inline-flex items-center rounded-full bg-cream px-4 py-2 text-sm font-medium text-boho-brown shadow-sm;
+        @apply inline-flex items-center rounded-2xl bg-cream px-4 py-2 text-sm font-medium text-boho-brown shadow-sm;
     }
 
     .chip.active {

@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Laravel\Facades\Image;
 
 class GuestEditorController extends Controller
 {
@@ -42,23 +41,18 @@ class GuestEditorController extends Controller
         $directory = 'photos/' . now()->format('Y/m');
         $filename = Str::ulid() . '.png';
         $path = $directory . '/' . $filename;
-        $thumbPath = $directory . '/thumb_' . $filename;
 
         $disk = Storage::disk('public');
         $disk->makeDirectory($directory);
 
-        $image = Image::read($binaryImage);
-        $disk->put($path, $image->toPng()->toString());
-
-        $thumb = Image::read($binaryImage)->cover(600, 600);
-        $disk->put($thumbPath, $thumb->toPng()->toString());
+        $disk->put($path, $binaryImage);
 
         $status = $settings->approval_required ? Photo::STATUS_PENDING : Photo::STATUS_APPROVED;
 
         $photo = Photo::create([
             'user_id' => Auth::id(),
             'image_path' => $path,
-            'thumb_path' => $thumbPath,
+            'thumb_path' => null,
             'status' => $status,
             'applied_filters' => $this->decodeJson($validated['applied_filters'] ?? null),
             'overlays' => $this->decodeJson($validated['overlay_json'] ?? null),

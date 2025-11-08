@@ -1,6 +1,10 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import * as fabric from 'fabric';
+import Konva from 'konva';
+import 'konva/lib/filters/Sepia';
+import 'konva/lib/filters/Grayscale';
+import 'konva/lib/filters/Brighten';
+import 'konva/lib/filters/Contrast';
 
 window.Alpine = Alpine;
 Alpine.start();
@@ -85,40 +89,41 @@ function initTabs() {
 
 function initGuestEditor() {
     const wrapper = document.getElementById('guest-editor');
-    const canvasElement = document.getElementById('editor-canvas');
+    const stageContainer = document.getElementById('editor-stage');
 
-    if (!wrapper || !canvasElement || typeof fabric === 'undefined') {
+    if (!wrapper || !stageContainer || typeof Konva === 'undefined') {
         return;
     }
 
-    fabric.Object.prototype.transparentCorners = false;
-    fabric.Object.prototype.cornerColor = '#C86B5A';
-    fabric.Object.prototype.cornerStyle = 'circle';
+    const containerId = 'editor-stage';
+
+    const stage = new Konva.Stage({
+        container: containerId,
+        width: stageContainer.clientWidth,
+        height: stageContainer.clientWidth * 1.2,
+    });
+
+    const backgroundLayer = new Konva.Layer();
+    const elementsLayer = new Konva.Layer();
+    stage.add(backgroundLayer);
+    stage.add(elementsLayer);
+
+    const backgroundRect = new Konva.Rect({
+        x: 0,
+        y: 0,
+        width: stage.width(),
+        height: stage.height(),
+        fill: '#FAF6F1',
+        listening: false,
+    });
+    backgroundLayer.add(backgroundRect);
+
+    let backgroundImage = null;
 
     const state = {
-        backgroundImage: null,
         currentFilter: 'none',
         textColor: '#C86B5A',
     };
-
-    const canvas = new fabric.Canvas(canvasElement, {
-        selectionColor: 'rgba(200,107,90,0.15)',
-        preserveObjectStacking: true,
-        backgroundColor: '#FAF6F1',
-    });
-
-    const resizeCanvas = () => {
-        const width = canvasElement.parentElement?.clientWidth || window.innerWidth - 32;
-        canvas.setWidth(width);
-        canvas.setHeight(width * 1.2);
-        canvas.requestRenderAll();
-        if (state.backgroundImage) {
-            scaleBackground(state.backgroundImage);
-        }
-    };
-
-    window.addEventListener('resize', debounce(resizeCanvas, 200));
-    resizeCanvas();
 
     const form = document.getElementById('editor-form');
     const cameraInput = document.getElementById('camera-input');
@@ -131,6 +136,25 @@ function initGuestEditor() {
     const hiddenImageInput = document.getElementById('image_data');
     const overlayInput = document.getElementById('overlay_json');
     const filtersInput = document.getElementById('applied_filters');
+    if (filtersInput) {
+        filtersInput.value = JSON.stringify({ filter: 'none' });
+    }
+
+    const resizeStage = () => {
+        const width = stageContainer.clientWidth || window.innerWidth - 32;
+        const height = width * 1.2;
+        stage.width(width);
+        stage.height(height);
+        backgroundRect.width(width);
+        backgroundRect.height(height);
+        if (backgroundImage) {
+            fitBackground();
+        }
+        stage.batchDraw();
+    };
+
+    window.addEventListener('resize', debounce(resizeStage, 200));
+    resizeStage();
 
     [cameraInput, galleryInput].forEach((input) => {
         if (!input) return;
@@ -165,22 +189,24 @@ function initGuestEditor() {
         });
     });
 
+    const isDataUrl = (value) => typeof value === 'string' && value.startsWith('data:');
+
     stickers.forEach((button) => {
         button.addEventListener('click', () => {
             const src = button.dataset.sticker;
             if (!src) return;
-            fabric.Image.fromURL(
+            Konva.Image.fromURL(
                 src,
-                (img) => {
-                    img.scaleToWidth(140);
-                    img.set({
-                        left: canvas.getWidth() / 2,
-                        top: canvas.getHeight() / 2,
-                        originX: 'center',
-                        originY: 'center',
+                (node) => {
+                    node.setAttrs({
+                        x: stage.width() / 2 - 60,
+                        y: stage.height() / 2 - 60,
+                        draggable: true,
+                        listening: true,
                     });
-                    canvas.add(img);
-                    canvas.setActiveObject(img);
+                    node.scale({ x: 0.8, y: 0.8 });
+                    elementsLayer.add(node);
+                    elementsLayer.draw();
                 },
                 { crossOrigin: 'anonymous' },
             );
@@ -205,16 +231,20 @@ function initGuestEditor() {
                 addTextbox();
                 break;
             case 'clear-text':
-                canvas.getObjects('textbox').forEach((object) => canvas.remove(object));
+                elementsLayer.find('Text').forEach((node) => node.destroy());
+                elementsLayer.draw();
                 break;
             case 'reset-canvas':
-                canvas.clear();
-                canvas.setBackgroundColor('#FAF6F1', canvas.requestRenderAll.bind(canvas));
-                state.backgroundImage = null;
+                elementsLayer.destroyChildren();
+                if (backgroundImage) {
+                    backgroundImage.destroy();
+                    backgroundImage = null;
+                }
                 state.currentFilter = 'none';
+                backgroundLayer.draw();
                 hiddenImageInput.value = '';
                 overlayInput.value = '';
-                filtersInput.value = '';
+                filtersInput.value = JSON.stringify({ filter: 'none' });
                 break;
             case 'save':
                 saveCanvas();
@@ -229,99 +259,158 @@ function initGuestEditor() {
             showToast('Escribe un texto para agregarlo');
             return;
         }
-        const textbox = new fabric.Textbox(text, {
-            fill: state.textColor,
-            fontSize: 36,
+
+        const textbox = new Konva.Text({
+            text,
+            x: stage.width() / 2 - 60,
+            y: stage.height() / 2 - 30,
             fontFamily: '"DM Sans", sans-serif',
-            fontWeight: 600,
-            left: canvas.getWidth() / 2,
-            top: canvas.getHeight() / 2,
-            originX: 'center',
-            originY: 'center',
-            editable: true,
+            fontSize: 32,
+            fontStyle: '600',
+            fill: state.textColor,
+            draggable: true,
         });
-        canvas.add(textbox);
-        canvas.setActiveObject(textbox);
+
+        elementsLayer.add(textbox);
+        elementsLayer.draw();
     }
 
-    function loadBackgroundImage(dataUrl) {
-        fabric.Image.fromURL(
-            dataUrl,
-            (img) => {
-                state.backgroundImage = img;
-                img.set({ selectable: false, evented: false });
-                canvas.setBackgroundImage(img, () => {
-                    scaleBackground(img);
-                    applyFilter(state.currentFilter);
-                    canvas.renderAll();
-                });
-            },
-            { crossOrigin: 'anonymous' },
-        );
+    function loadBackgroundImage(source) {
+        const image = new window.Image();
+        if (!isDataUrl(source)) {
+            image.crossOrigin = 'anonymous';
+        }
+        image.onload = () => {
+            if (backgroundImage) {
+                backgroundImage.destroy();
+            }
+            backgroundImage = new Konva.Image({
+                image,
+                listening: false,
+            });
+            backgroundLayer.add(backgroundImage);
+            backgroundImage.moveToTop();
+            fitBackground();
+            applyFilter(state.currentFilter, true);
+            backgroundLayer.draw();
+        };
+        image.onerror = () => showToast('No pudimos cargar esta imagen');
+        image.src = source;
     }
 
-    function scaleBackground(image) {
-        const width = canvas.getWidth();
-        const height = canvas.getHeight();
-        const scale = Math.max(width / image.width, height / image.height);
-        image.scale(scale);
-        image.set({
-            left: width / 2,
-            top: height / 2,
-            originX: 'center',
-            originY: 'center',
+    function fitBackground() {
+        if (!backgroundImage) {
+            return;
+        }
+        const img = backgroundImage.image();
+        if (!img) {
+            return;
+        }
+        const width = stage.width();
+        const height = stage.height();
+        const scale = Math.max(width / img.width, height / img.height);
+        backgroundImage.width(img.width * scale);
+        backgroundImage.height(img.height * scale);
+        backgroundImage.position({
+            x: (width - backgroundImage.width()) / 2,
+            y: (height - backgroundImage.height()) / 2,
         });
     }
 
     function applyFilter(filter) {
         state.currentFilter = filter;
-        if (!state.backgroundImage) {
+        if (filtersInput) {
+            filtersInput.value = JSON.stringify({ filter });
+        }
+
+        if (!backgroundImage) {
+            return;
+        }
+
+        const resetAdjustments = () => {
+            if (typeof backgroundImage.red === 'function') {
+                backgroundImage.red(0);
+                backgroundImage.green(0);
+                backgroundImage.blue(0);
+            }
+            if (typeof backgroundImage.brightness === 'function') {
+                backgroundImage.brightness(0);
+            }
+            if (typeof backgroundImage.contrast === 'function') {
+                backgroundImage.contrast(0);
+            }
+            if (typeof backgroundImage.noise === 'function') {
+                backgroundImage.noise(0);
+            }
+        };
+
+        if (filter === 'none') {
+            backgroundImage.filters([]);
+            if (backgroundImage.clearCache) {
+                backgroundImage.clearCache();
+            }
+            backgroundLayer.batchDraw();
             return;
         }
 
         const filters = [];
+
+        resetAdjustments();
+
         switch (filter) {
             case 'sepia':
-                filters.push(new fabric.Image.filters.Sepia());
+                filters.push(Konva.Filters.Sepia);
                 break;
             case 'grayscale':
-                filters.push(new fabric.Image.filters.Grayscale());
+                filters.push(Konva.Filters.Grayscale);
+                break;
+            case 'enhance':
+                filters.push(Konva.Filters.Contrast, Konva.Filters.Brighten);
+                if (typeof backgroundImage.contrast === 'function') {
+                    backgroundImage.contrast(0.25);
+                }
+                if (typeof backgroundImage.brightness === 'function') {
+                    backgroundImage.brightness(0.08);
+                }
                 break;
             case 'vintage':
-                filters.push(new fabric.Image.filters.Brownie());
-                break;
-            case 'warm':
-                filters.push(new fabric.Image.filters.Sepia());
-                filters.push(
-                    new fabric.Image.filters.BlendColor({
-                        color: '#E7B99A',
-                        mode: 'multiply',
-                        alpha: 0.25,
-                    }),
-                );
+                filters.push(Konva.Filters.Sepia, Konva.Filters.Brighten);
+                if (typeof backgroundImage.brightness === 'function') {
+                    backgroundImage.brightness(-0.04);
+                }
+                if (typeof backgroundImage.noise === 'function') {
+                    backgroundImage.noise(6);
+                }
                 break;
             default:
                 filters.length = 0;
         }
 
-        state.backgroundImage.filters = filters;
-        state.backgroundImage.applyFilters();
-        canvas.requestRenderAll();
+        backgroundImage.filters(filters);
+        if (backgroundImage.cache) {
+            backgroundImage.cache({ pixelRatio: 1 });
+        }
+        backgroundLayer.batchDraw();
     }
 
     function saveCanvas() {
-        if (!state.backgroundImage) {
+        if (!backgroundImage) {
             showToast('Primero selecciona una foto');
             return;
         }
-        canvas.discardActiveObject();
-        canvas.renderAll();
-        hiddenImageInput.value = canvas.toDataURL({
-            format: 'png',
-            quality: 1,
+
+        const maxExport = 1280;
+        const longestSide = Math.max(stage.width(), stage.height());
+        const pixelRatio = longestSide > maxExport ? maxExport / longestSide : 1;
+
+        const dataUrl = stage.toDataURL({
+            mimeType: 'image/jpeg',
+            quality: 0.88,
+            pixelRatio,
         });
-        overlayInput.value = JSON.stringify(canvas.toJSON());
-        filtersInput.value = JSON.stringify({ filter: state.currentFilter });
+
+        hiddenImageInput.value = dataUrl;
+        overlayInput.value = stage.toJSON();
         form?.submit();
     }
 }
