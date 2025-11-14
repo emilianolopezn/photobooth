@@ -7,9 +7,9 @@
 @section('content')
     <section class="space-y-6" id="guest-editor">
         <div class="space-y-2">
-            <p class="text-xs uppercase tracking-[0.3em] text-sage">Editor boho</p>
-            <h1 class="text-3xl font-semibold">Diseña tu foto</h1>
-            <p class="text-sm text-boho-brown/70">Elige una foto, aplica filtros, stickers y texto antes de enviarla.</p>
+            <p class="text-xs uppercase tracking-[0.3em] text-sage">Evelyn & Emiliano</p>
+            <h1 class="text-3xl font-semibold">Comparte tu foto</h1>
+            <p class="text-sm text-boho-brown/70">Elige una foto y si gustas, aplica filtros, stickers y texto.</p>
         </div>
 
         <form id="editor-form" action="{{ route('guest.photo.store', ['guestSlug' => $settings->guest_url_slug]) }}" method="POST" class="space-y-4">
