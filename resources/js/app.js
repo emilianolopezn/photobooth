@@ -128,6 +128,8 @@ function initGuestEditor() {
         textFont: "'Boho Script', cursive",
         strokeColor: '#FFFFFF',
         strokeWidth: 0,
+        sourceWidth: null,
+        sourceHeight: null,
     };
 
     const form = document.getElementById('editor-form');
@@ -334,6 +336,8 @@ function initGuestEditor() {
             image.crossOrigin = 'anonymous';
         }
         image.onload = () => {
+            state.sourceWidth = image.width;
+            state.sourceHeight = image.height;
             if (backgroundImage) {
                 backgroundImage.destroy();
             }
@@ -452,13 +456,14 @@ function initGuestEditor() {
             return;
         }
 
-        const maxExport = 1280;
-        const longestSide = Math.max(stage.width(), stage.height());
-        const pixelRatio = longestSide > maxExport ? maxExport / longestSide : 1;
+        const sourceWidth = state.sourceWidth || stage.width();
+        const desiredRatio = sourceWidth / stage.width();
+        const maxRatio = 6;
+        const pixelRatio = Math.max(1, Math.min(desiredRatio, maxRatio));
 
         const dataUrl = stage.toDataURL({
             mimeType: 'image/jpeg',
-            quality: 0.88,
+            quality: 0.9,
             pixelRatio,
         });
 
