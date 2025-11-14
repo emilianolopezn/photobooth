@@ -121,6 +121,8 @@ function initGuestEditor() {
 
     let backgroundImage = null;
     let activeTextNode = null;
+    let activeSticker = null;
+    let pinchState = null;
 
     const state = {
         currentFilter: 'none',
@@ -163,6 +165,74 @@ function initGuestEditor() {
 
     window.addEventListener('resize', debounce(resizeStage, 200));
     resizeStage();
+
+    const beginPinch = (node, touches) => {
+        if (!node || !touches || touches.length < 2) {
+            return;
+        }
+
+        pinchState = {
+            node,
+            initialDistance: getTouchDistance(touches),
+            initialScale: node.scaleX() || 1,
+        };
+    };
+
+    stage.on('touchstart', (event) => {
+        const touches = event.evt.touches;
+        if (!touches || touches.length < 2) {
+            return;
+        }
+
+        let targetNode = null;
+        const target = event.target;
+
+        if (target && target.getClassName && target.getClassName() === 'Image' && target.getLayer() === elementsLayer) {
+            targetNode = target;
+            activeSticker = target;
+            activeTextNode = null;
+        } else if (activeSticker) {
+            targetNode = activeSticker;
+        }
+
+        if (targetNode) {
+            event.evt.preventDefault();
+            beginPinch(targetNode, touches);
+            targetNode.draggable(false);
+        }
+    });
+
+    stage.on('touchmove', (event) => {
+        if (!pinchState || !pinchState.initialDistance) {
+            return;
+        }
+
+        const touches = event.evt.touches;
+        if (!touches || touches.length < 2) {
+            return;
+        }
+
+        event.evt.preventDefault();
+        const newDistance = getTouchDistance(touches);
+        if (!newDistance) {
+            return;
+        }
+
+        const factor = newDistance / pinchState.initialDistance;
+        const nextScale = Math.max(0.25, Math.min(4, pinchState.initialScale * factor));
+        pinchState.node.scale({ x: nextScale, y: nextScale });
+        elementsLayer.batchDraw();
+    });
+
+    stage.on('touchend', (event) => {
+        const touches = event.evt.touches;
+        if (!touches || touches.length < 2) {
+            if (pinchState?.node) {
+                pinchState.node.draggable(true);
+            }
+            pinchState = null;
+        }
+    });
 
     [cameraInput, galleryInput].forEach((input) => {
         if (!input) return;
@@ -219,8 +289,13 @@ function initGuestEditor() {
         const target = event.target;
         if (target && target.getClassName && target.getClassName() === 'Text') {
             activeTextNode = target;
+            activeSticker = null;
+        } else if (target && target.getClassName && target.getClassName() === 'Image') {
+            activeSticker = target;
+            activeTextNode = null;
         } else {
             activeTextNode = null;
+            activeSticker = null;
         }
     });
 
@@ -240,6 +315,7 @@ function initGuestEditor() {
                         listening: true,
                     });
                     node.scale({ x: 0.8, y: 0.8 });
+                    attachStickerInteractions(node);
                     elementsLayer.add(node);
                     elementsLayer.draw();
                 },
@@ -328,6 +404,47 @@ function initGuestEditor() {
             node.stroke(null);
         }
         node.strokeWidth(state.strokeWidth);
+    }
+
+    function getTouchDistance(touches) {
+        if (!touches || touches.length < 2) {
+            return 0;
+        }
+
+        const [first, second] = touches;
+        const dx = first.clientX - second.clientX;
+        const dy = first.clientY - second.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function attachStickerInteractions(node) {
+        node.on('click tap', () => {
+            activeSticker = node;
+            activeTextNode = null;
+        });
+
+        node.on('touchstart', () => {
+            activeSticker = node;
+            activeTextNode = null;
+            if (pinchState) {
+                node.draggable(false);
+            }
+        });
+
+        node.on('dragstart', () => {
+            if (pinchState) {
+                node.stopDrag();
+                return;
+            }
+            activeSticker = node;
+            activeTextNode = null;
+        });
+
+        node.on('dragend', () => {
+            if (!pinchState) {
+                node.draggable(true);
+            }
+        });
     }
 
     function loadBackgroundImage(source) {
