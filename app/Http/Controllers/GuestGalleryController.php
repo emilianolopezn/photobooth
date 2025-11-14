@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Photo;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class GuestGalleryController extends Controller
 {
@@ -29,11 +30,25 @@ class GuestGalleryController extends Controller
             $photosQuery->where('status', '!=', Photo::STATUS_REJECTED);
         }
 
-        $photos = $photosQuery->get();
+        $photos = $photosQuery->paginate(30);
+
+        if ($request->wantsJson()) {
+            $items = $photos->map(fn (Photo $photo) => [
+                'id' => $photo->id,
+                'thumb' => Storage::disk('public')->url($photo->thumb_path ?? $photo->image_path),
+                'full' => Storage::disk('public')->url($photo->image_path),
+            ]);
+
+            return response()->json([
+                'photos' => $items,
+                'next_page_url' => $photos->hasMorePages() ? $photos->nextPageUrl() : null,
+            ]);
+        }
 
         return view('guest.gallery', [
             'settings' => $settings,
             'photos' => $photos,
+            'nextPageUrl' => $photos->hasMorePages() ? $photos->nextPageUrl() : null,
         ]);
     }
 }

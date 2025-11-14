@@ -358,6 +358,9 @@ function initGuestEditor() {
                 hiddenImageInput.value = '';
                 overlayInput.value = '';
                 filtersInput.value = JSON.stringify({ filter: 'none' });
+                if (thumbInput) {
+                    thumbInput.value = '';
+                }
                 state.textFont = "'Boho Script', cursive";
                 state.strokeWidth = 0;
                 state.strokeColor = '#FFFFFF';
@@ -593,7 +596,9 @@ function initGuestEditor() {
 
         hiddenImageInput.value = dataUrl;
         overlayInput.value = stage.toJSON();
-        thumbInput.value = thumbUrl;
+        if (thumbInput) {
+            thumbInput.value = thumbUrl;
+        }
         form?.submit();
     }
 }
@@ -724,6 +729,101 @@ function initSettingsSlugPreview() {
     });
 }
 
+function initGuestInfiniteScroll() {
+    const grid = document.getElementById('gallery-grid');
+    const loader = document.getElementById('gallery-loader');
+
+    if (!grid) {
+        return;
+    }
+
+    let nextPage = grid.dataset.nextPage || '';
+    let loading = false;
+    loader?.classList.add('hidden');
+
+    const sentinel = document.createElement('div');
+    sentinel.id = 'gallery-sentinel';
+    sentinel.style.height = '1px';
+    grid.parentNode?.insertBefore(sentinel, loader ?? null);
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                fetchNextPage();
+            }
+        },
+        { rootMargin: '200px' },
+    );
+
+    if (nextPage) {
+        observer.observe(sentinel);
+    } else {
+        loader?.classList.add('hidden');
+    }
+
+    function fetchNextPage() {
+        if (!nextPage || loading) {
+            return;
+        }
+
+        loading = true;
+        loader?.classList.remove('hidden');
+
+        fetch(nextPage, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network error');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                appendPhotos(data.photos || []);
+                nextPage = data.next_page_url || '';
+                grid.dataset.nextPage = nextPage;
+
+                if (!nextPage) {
+                    loader?.classList.add('hidden');
+                    observer.unobserve(sentinel);
+                }
+            })
+            .catch(() => showToast('No pudimos cargar más fotos'))
+            .finally(() => {
+                loading = false;
+            });
+    }
+
+    function appendPhotos(photos) {
+        if (!photos.length) {
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        photos.forEach((photo) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'gallery-thumb';
+            button.dataset.fullImage = photo.full;
+            button.setAttribute('aria-label', 'Ver foto completa');
+
+            const img = document.createElement('img');
+            img.src = photo.thumb;
+            img.alt = 'Foto invitado';
+            img.loading = 'lazy';
+            img.className = 'aspect-square object-cover rounded-xl shadow-soft';
+
+            button.appendChild(img);
+            fragment.appendChild(button);
+        });
+
+        grid.appendChild(fragment);
+    }
+}
+
 function initGalleryLightbox() {
     const overlay = document.getElementById('gallery-lightbox');
     const image = document.getElementById('gallery-lightbox-img');
@@ -732,18 +832,25 @@ function initGalleryLightbox() {
     const counter = document.getElementById('gallery-counter');
     const nextButton = document.getElementById('gallery-next');
     const prevButton = document.getElementById('gallery-prev');
-    const triggers = document.querySelectorAll('[data-full-image]');
 
-    if (!overlay || !image || !triggers.length) {
+    if (!overlay || !image) {
         return;
     }
 
     let currentIndex = 0;
 
+    const getTriggers = () => Array.from(document.querySelectorAll('[data-full-image]'));
+
     const updateCounter = () => {
         if (!counter) return;
-        const total = triggers.length;
-        counter.textContent = `${currentIndex + 1}/${total}`;
+        const total = getTriggers().length;
+        if (!total) {
+            counter.textContent = '0/0';
+            return;
+        }
+
+        const displayIndex = Math.min(currentIndex + 1, total);
+        counter.textContent = `${displayIndex}/${total}`;
     };
 
     const open = (src) => {
@@ -751,9 +858,9 @@ function initGalleryLightbox() {
         if (downloadBtn) {
             downloadBtn.href = src;
         }
-        updateCounter();
         overlay.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        updateCounter();
     };
 
     const close = () => {
@@ -763,6 +870,7 @@ function initGalleryLightbox() {
     };
 
     const showImageAt = (index) => {
+        const triggers = getTriggers();
         const total = triggers.length;
         if (!total) return;
         currentIndex = (index + total) % total;
@@ -770,16 +878,24 @@ function initGalleryLightbox() {
         if (nextImage) {
             open(nextImage);
         }
-        updateCounter();
     };
 
     const showNext = () => showImageAt(currentIndex + 1);
     const showPrev = () => showImageAt(currentIndex - 1);
 
-    triggers.forEach((trigger, index) => {
-        trigger.addEventListener('click', () => {
-            showImageAt(index);
-        });
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-full-image]');
+        if (!trigger) {
+            return;
+        }
+
+        event.preventDefault();
+        const triggers = getTriggers();
+        const index = triggers.indexOf(trigger);
+        if (index === -1) {
+            return;
+        }
+        showImageAt(index);
     });
 
     closeButton?.addEventListener('click', close);

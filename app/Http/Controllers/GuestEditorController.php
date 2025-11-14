@@ -41,7 +41,7 @@ class GuestEditorController extends Controller
         $binaryThumb = $validated['thumb_data'] ? $this->decodeDataUrl($validated['thumb_data']) : null;
 
         $directory = 'photos/' . now()->format('Y/m');
-        $filename = Str::ulid() . '.png';
+        $filename = Str::ulid() . '.jpg';
         $path = $directory . '/' . $filename;
         $thumbPath = $binaryThumb ? $directory . '/thumb_' . $filename : null;
 

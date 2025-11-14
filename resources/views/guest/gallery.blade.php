@@ -23,9 +23,9 @@
             <div>
                 <div class="flex items-center justify-between mb-3">
                     <p class="font-semibold">Galería de invitados</p>
-                    <p class="text-xs text-boho-brown/60">{{ $photos->count() }} fotos</p>
+                    <p class="text-xs text-boho-brown/60">{{ $photos->total() }} fotos</p>
                 </div>
-                <div class="grid grid-cols-3 gap-1">
+                <div id="gallery-grid" class="grid grid-cols-3 gap-1" data-next-page="{{ $nextPageUrl }}">
                     @forelse ($photos as $photo)
                         @php
                             $fullUrl = Storage::disk('public')->url($photo->image_path);
@@ -37,6 +37,9 @@
                     @empty
                         <p class="col-span-3 text-center text-sm text-boho-brown/70 py-6">Aún no hay fotos. ¡Sé la primera persona en compartir!</p>
                     @endforelse
+                </div>
+                <div id="gallery-loader" class="mt-4 text-center text-sm text-boho-brown/70 hidden">
+                    Cargando más recuerdos…
                 </div>
             </div>
         @endif
@@ -63,9 +66,10 @@
         </div>
     </div>
 
-    <a href="{{ route('guest.editor', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab" aria-label="Abrir editor">
+    <a href="{{ route('guest.editor', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab" aria-label="Agregar foto">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 7v10a2 2 0 002 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 7h2l1-2h6l1 2h2a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6M9 13h6" />
         </svg>
     </a>
 @endsection
