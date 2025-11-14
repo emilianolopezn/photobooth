@@ -34,25 +34,31 @@ class GuestEditorController extends Controller
             'image_data' => ['required', 'string'],
             'applied_filters' => ['nullable', 'string'],
             'overlay_json' => ['nullable', 'string'],
+            'thumb_data' => ['nullable', 'string'],
         ]);
 
         $binaryImage = $this->decodeDataUrl($validated['image_data']);
+        $binaryThumb = $validated['thumb_data'] ? $this->decodeDataUrl($validated['thumb_data']) : null;
 
         $directory = 'photos/' . now()->format('Y/m');
         $filename = Str::ulid() . '.png';
         $path = $directory . '/' . $filename;
+        $thumbPath = $binaryThumb ? $directory . '/thumb_' . $filename : null;
 
         $disk = Storage::disk('public');
         $disk->makeDirectory($directory);
 
         $disk->put($path, $binaryImage);
+        if ($binaryThumb && $thumbPath) {
+            $disk->put($thumbPath, $binaryThumb);
+        }
 
         $status = $settings->approval_required ? Photo::STATUS_PENDING : Photo::STATUS_APPROVED;
 
         $photo = Photo::create([
             'user_id' => Auth::id(),
             'image_path' => $path,
-            'thumb_path' => null,
+            'thumb_path' => $thumbPath,
             'status' => $status,
             'applied_filters' => $this->decodeJson($validated['applied_filters'] ?? null),
             'overlays' => $this->decodeJson($validated['overlay_json'] ?? null),

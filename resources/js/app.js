@@ -145,6 +145,7 @@ function initGuestEditor() {
     const hiddenImageInput = document.getElementById('image_data');
     const overlayInput = document.getElementById('overlay_json');
     const filtersInput = document.getElementById('applied_filters');
+    const thumbInput = document.getElementById('thumb_data');
     const strokeDots = wrapper.querySelectorAll('[data-stroke]');
     if (filtersInput) {
         filtersInput.value = JSON.stringify({ filter: 'none' });
@@ -584,8 +585,15 @@ function initGuestEditor() {
             pixelRatio,
         });
 
+        const thumbUrl = stage.toDataURL({
+            mimeType: 'image/jpeg',
+            quality: 0.75,
+            pixelRatio: Math.min(1, 300 / stage.width()),
+        });
+
         hiddenImageInput.value = dataUrl;
         overlayInput.value = stage.toJSON();
+        thumbInput.value = thumbUrl;
         form?.submit();
     }
 }

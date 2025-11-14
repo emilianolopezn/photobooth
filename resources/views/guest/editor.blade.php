@@ -31,6 +31,7 @@
             <input type="hidden" name="image_data" id="image_data">
             <input type="hidden" name="overlay_json" id="overlay_json">
             <input type="hidden" name="applied_filters" id="applied_filters">
+            <input type="hidden" name="thumb_data" id="thumb_data">
             @error('image_data')
                 <p class="form-error">{{ $message }}</p>
             @enderror
