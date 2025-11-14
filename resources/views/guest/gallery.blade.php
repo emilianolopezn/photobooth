@@ -7,9 +7,9 @@
 @section('content')
     <section class="space-y-6">
         <div class="rounded-3xl bg-gradient-to-br from-terracotta/90 to-brown/90 p-6 text-cream shadow-soft">
-            <p class="text-xs uppercase tracking-[0.3em] text-cream/80">Photo Booth</p>
+            <p class="text-xs uppercase tracking-[0.3em] text-cream/80">15/nov/2025</p>
             <h1 class="text-3xl font-semibold mt-2">{{ $settings->event_title }}</h1>
-            <p class="mt-4 text-sm">Construyamos juntos un jardín de recuerdos: compartan sus fotografías para que cada mirada, cada risa y cada abrazo se unan en un mismo álbum de eternidad. (Sube las fotos, ¡no te hagas wey!)</p>
+            <p class="mt-4 text-sm">Comparte las fotografías y videos que captaste en nuestra boda para juntos poder recordar este día tan especial.</p>
         </div>
 
         @if (! $settings->gallery_active)
