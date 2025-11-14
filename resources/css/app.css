@@ -57,6 +57,14 @@
         @apply fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-terracotta text-cream shadow-soft;
     }
 
+    .fab-photo {
+        @apply bottom-6;
+    }
+
+    .fab-video {
+        @apply bottom-24;
+    }
+
     .input-pill {
         @apply flex h-12 items-center justify-center rounded-2xl bg-beige text-sm font-medium text-boho-brown;
     }
@@ -187,6 +195,14 @@
 
     .gallery-thumb img {
         @apply w-full;
+    }
+
+    .gallery-thumb {
+        @apply relative overflow-hidden;
+    }
+
+    .gallery-play-icon {
+        @apply pointer-events-none absolute inset-0 flex items-center justify-center text-white/90;
     }
 
     .gallery-overlay {

@@ -59,6 +59,8 @@ class GuestEditorController extends Controller
             'user_id' => Auth::id(),
             'image_path' => $path,
             'thumb_path' => $thumbPath,
+            'video_path' => null,
+            'media_type' => Photo::TYPE_PHOTO,
             'status' => $status,
             'applied_filters' => $this->decodeJson($validated['applied_filters'] ?? null),
             'overlays' => $this->decodeJson($validated['overlay_json'] ?? null),

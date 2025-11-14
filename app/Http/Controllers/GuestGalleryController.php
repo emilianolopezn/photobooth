@@ -37,6 +37,7 @@ class GuestGalleryController extends Controller
                 'id' => $photo->id,
                 'thumb' => Storage::disk('public')->url($photo->thumb_path ?? $photo->image_path),
                 'full' => Storage::disk('public')->url($photo->image_path),
+                'type' => $photo->media_type,
             ]);
 
             return response()->json([

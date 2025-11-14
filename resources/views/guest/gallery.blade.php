@@ -1,4 +1,5 @@
 @php
+    use App\Models\Photo;
     use Illuminate\Support\Facades\Storage;
 @endphp
 
@@ -31,8 +32,15 @@
                             $fullUrl = Storage::disk('public')->url($photo->image_path);
                             $thumbUrl = Storage::disk('public')->url($photo->thumb_path ?? $photo->image_path);
                         @endphp
-                        <button type="button" class="gallery-thumb" data-full-image="{{ $fullUrl }}" aria-label="Ver foto completa">
+                        <button type="button" class="gallery-thumb" data-full-src="{{ $fullUrl }}" data-media-type="{{ $photo->media_type }}" aria-label="Ver elemento completo">
                             <img src="{{ $thumbUrl }}" alt="Foto {{ $photo->id }}" loading="lazy" class="aspect-square object-cover rounded-xl shadow-soft">
+                            @if ($photo->media_type === Photo::TYPE_VIDEO)
+                                <span class="gallery-play-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                </span>
+                            @endif
                         </button>
                     @empty
                         <p class="col-span-3 text-center text-sm text-boho-brown/70 py-6">Aún no hay fotos. ¡Sé la primera persona en compartir!</p>
@@ -61,12 +69,21 @@
         </button>
         <div class="gallery-overlay-content">
             <img id="gallery-lightbox-img" src="" alt="Foto seleccionada" class="gallery-full-image">
-            <a id="gallery-download-btn" href="#" download class="gallery-download-btn mt-6">Descargar foto</a>
+            <video id="gallery-lightbox-video" controls playsinline class="gallery-full-image hidden"></video>
+            <a id="gallery-download-btn" href="#" download class="gallery-download-btn mt-6">Descargar archivo</a>
             <p id="gallery-counter" class="gallery-counter mt-2">1/1</p>
         </div>
     </div>
 
-    <a href="{{ route('guest.editor', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab" aria-label="Agregar foto">
+    <a href="{{ route('guest.video', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab fab-video" aria-label="Agregar video">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7h8a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10v4M6 12h4" />
+        </svg>
+    </a>
+
+    <a href="{{ route('guest.editor', ['guestSlug' => $settings->guest_url_slug]) }}" class="fab fab-photo" aria-label="Agregar foto">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 7h2l1-2h6l1 2h2a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6M9 13h6" />

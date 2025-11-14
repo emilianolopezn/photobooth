@@ -23,6 +23,8 @@ class PhotoFactory extends Factory
             'user_id' => User::factory(),
             'image_path' => 'photos/' . now()->format('Y/m') . '/' . $this->faker->uuid() . '.png',
             'thumb_path' => 'photos/' . now()->format('Y/m') . '/thumb_' . $this->faker->uuid() . '.png',
+            'video_path' => null,
+            'media_type' => Photo::TYPE_PHOTO,
             'status' => $status,
             'applied_filters' => ['filter' => 'sepia', 'intensity' => 0.7],
             'overlays' => ['objects' => []],

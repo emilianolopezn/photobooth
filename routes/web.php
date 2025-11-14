@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StickerController;
 use App\Http\Controllers\GuestEditorController;
 use App\Http\Controllers\GuestGalleryController;
+use App\Http\Controllers\GuestVideoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [GuestGalleryController::class, 'redirect'])->name('guest.redirect');
@@ -56,3 +57,11 @@ Route::get('/{guestSlug}/editor', [GuestEditorController::class, 'create'])
 Route::post('/{guestSlug}/foto', [GuestEditorController::class, 'store'])
     ->where('guestSlug', $guestConstraint)
     ->name('guest.photo.store');
+
+Route::get('/{guestSlug}/video', [GuestVideoController::class, 'create'])
+    ->where('guestSlug', $guestConstraint)
+    ->name('guest.video');
+
+Route::post('/{guestSlug}/video', [GuestVideoController::class, 'store'])
+    ->where('guestSlug', $guestConstraint)
+    ->name('guest.video.store');

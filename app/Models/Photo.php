@@ -15,6 +15,8 @@ class Photo extends Model
         'user_id',
         'image_path',
         'thumb_path',
+        'video_path',
+        'media_type',
         'status',
         'applied_filters',
         'overlays',
@@ -31,6 +33,8 @@ class Photo extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
+    public const TYPE_PHOTO = 'photo';
+    public const TYPE_VIDEO = 'video';
 
     public function scopeApproved($query)
     {
