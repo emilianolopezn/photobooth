@@ -24,9 +24,17 @@
 
             <input type="hidden" name="thumbnail_data" id="video_thumbnail_data">
 
-            <div class="flex gap-3">
-                <a href="{{ route('guest.gallery', ['guestSlug' => $settings->guest_url_slug]) }}" class="btn-secondary flex-1 text-center">Cancelar</a>
-                <button type="submit" class="btn-primary flex-1" id="video-submit" disabled>Subir video</button>
+            <div class="space-y-3">
+                <div class="w-full">
+                    <div class="h-2 rounded-full bg-cream/60 overflow-hidden">
+                        <div id="video-progress-bar" class="h-full w-0 bg-terracotta transition-all duration-300"></div>
+                    </div>
+                    <p id="video-progress-label" class="mt-1 text-xs text-boho-brown/70 text-right">0%</p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="{{ route('guest.gallery', ['guestSlug' => $settings->guest_url_slug]) }}" class="btn-secondary flex-1 text-center">Cancelar</a>
+                    <button type="submit" class="btn-primary flex-1" id="video-submit" disabled>Subir video</button>
+                </div>
             </div>
 
             @error('video')

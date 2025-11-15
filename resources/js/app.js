@@ -618,6 +618,8 @@ function initGuestVideoUploader() {
     const thumbnailInput = document.getElementById('video_thumbnail_data');
     const submitBtn = document.getElementById('video-submit');
     const form = document.getElementById('video-form');
+    const progressBar = document.getElementById('video-progress-bar');
+    const progressLabel = document.getElementById('video-progress-label');
 
     let currentFile = null;
     let currentUrl = null;
@@ -697,7 +699,16 @@ function initGuestVideoUploader() {
         if (!currentFile) {
             event.preventDefault();
             showToast('Primero selecciona un video');
+            return;
         }
+
+        if (form.dataset.uploading === '1') {
+            event.preventDefault();
+            return;
+        }
+
+        event.preventDefault();
+        uploadVideo(new FormData(form));
     });
 
     const generateVideoThumbnail = (file) =>
@@ -745,6 +756,55 @@ function initGuestVideoUploader() {
                 { once: true },
             );
         });
+    function uploadVideo(formData) {
+        const request = new XMLHttpRequest();
+        request.open('POST', form.getAttribute('action'), true);
+        request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        request.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+        form.dataset.uploading = '1';
+        submitBtn.disabled = true;
+
+        request.upload.addEventListener('progress', (event) => {
+            if (!event.lengthComputable) return;
+            const percent = Math.round((event.loaded / event.total) * 100);
+            updateProgress(percent);
+        });
+
+        request.onreadystatechange = () => {
+            if (request.readyState === XMLHttpRequest.DONE) {
+                if (request.status >= 200 && request.status < 300) {
+                    window.location.href = request.responseURL || form.getAttribute('action');
+                } else if (request.status === 422) {
+                    const response = JSON.parse(request.responseText);
+                    const errors = Object.values(response.errors || {})
+                        .flat()
+                        .join(' ');
+                    showToast(errors || 'Error al subir video.');
+                    resetUploadState();
+                } else {
+                    showToast('Algo salió mal al subir el video.');
+                    resetUploadState();
+                }
+            }
+        };
+
+        request.send(formData);
+    }
+
+    function resetUploadState() {
+        form.dataset.uploading = '0';
+        submitBtn.disabled = false;
+        updateProgress(0);
+    }
+
+    function updateProgress(percent) {
+        if (progressBar) {
+            progressBar.style.width = `${percent}%`;
+        }
+        if (progressLabel) {
+            progressLabel.textContent = `${percent}%`;
+        }
+    }
 }
 
 function initModerationDeck() {
@@ -877,18 +937,19 @@ function initGuestInfiniteScroll() {
     const grid = document.getElementById('gallery-grid');
     const loader = document.getElementById('gallery-loader');
 
-    if (!grid) {
+    if (!grid || !loader) {
         return;
     }
 
     let nextPage = grid.dataset.nextPage || '';
     let loading = false;
-    loader?.classList.add('hidden');
+
+    loader.classList.add('hidden');
 
     const sentinel = document.createElement('div');
     sentinel.id = 'gallery-sentinel';
     sentinel.style.height = '1px';
-    grid.parentNode?.insertBefore(sentinel, loader ?? null);
+    grid.parentNode?.insertBefore(sentinel, loader);
 
     const observer = new IntersectionObserver(
         (entries) => {
@@ -902,7 +963,7 @@ function initGuestInfiniteScroll() {
     if (nextPage) {
         observer.observe(sentinel);
     } else {
-        loader?.classList.add('hidden');
+        loader.classList.add('hidden');
     }
 
     function fetchNextPage() {
@@ -911,7 +972,7 @@ function initGuestInfiniteScroll() {
         }
 
         loading = true;
-        loader?.classList.remove('hidden');
+        loader.classList.remove('hidden');
 
         fetch(nextPage, {
             headers: {
@@ -931,13 +992,13 @@ function initGuestInfiniteScroll() {
                 grid.dataset.nextPage = nextPage;
 
                 if (!nextPage) {
-                    loader?.classList.add('hidden');
+                    loader.classList.add('hidden');
                     observer.unobserve(sentinel);
                 }
             })
             .catch(() => showToast('No pudimos cargar más fotos'))
             .finally(() => {
-                loader?.classList.add('hidden');
+                loader.classList.add('hidden');
                 loading = false;
             });
     }
