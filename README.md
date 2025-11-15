@@ -1,59 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PhotoBooth Boho Chic
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación móvil-first construida con Laravel 12, TailwindCSS y Vite para gestionar un “photo booth” de bodas estilo boho chic. El sistema permite a invitados subir fotos editadas con stickers/canvas, capturar videos con miniatura generada en el navegador y mostrarlas en una galería optimizada para pantallas táctiles.
 
-## About Laravel
+## Características principales
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Galería pública**  
+  - Grid con scroll infinito y carga progresiva.  
+  - Miniaturas para fotos y videos (con icono de play).  
+  - Lightbox que muestra imágenes o reproduce videos en pantalla completa, con navegación swipe/botones y descarga directa.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Editor de fotos**  
+  - Canvas Konva con filtros (“Sepia”, “Blanco y Negro”, “Realce”, “Vintage”).  
+  - Stickers boho: mover, girar y escalar vía gesto pinch.  
+  - Textos con tipografía “Boho Script”, selección de color y borde.  
+  - Exportación del lienzo en alta resolución + thumbnail para la galería.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Carga de videos**  
+  - Vista dedicada (`/invitados/video`) para grabar o elegir MP4/MOV (hasta 256 MB).  
+  - Previsualización, generación de thumbnail y barra de progreso durante la subida.  
+  - Validación tanto en frontend como en backend.
 
-## Learning Laravel
+- **Panel admin (Laravel Breeze)**  
+  - Dashboard, moderación tipo swipe, CRUD de stickers, configuración del evento y flyer con QR.  
+  - Protección por roles (`admin`/`guest`).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Requisitos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- MySQL/MariaDB (ver `.env.example`)
 
-## Laravel Sponsors
+## Configuración rápida
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm install
+npm run build # o npm run dev
+```
 
-### Premium Partners
+Para desarrollo puedes usar:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan serve
+npm run dev
+```
 
-## Contributing
+## Rutas clave
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Invitados  
+  - `/invitados` – galería.  
+  - `/invitados/editor` – editor de fotos.  
+  - `/invitados/video` – carga de videos.
+- Administración  
+  - `/admin/login` – acceso administrador.  
+  - `/admin` – dashboard y submódulos.
 
-## Code of Conduct
+## Notas adicionales
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Los archivos se almacenan en `storage/app/public` (asegúrate de ejecutar `php artisan storage:link`).  
+- El backend diferencia fotos y videos con el campo `media_type` de `photos`.  
+- El límite de video es de 256 MB; ajusta `upload_max_filesize`/`post_max_size` en PHP si necesitas más.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Con ❤️ para bodas boho chic. Si necesitas más detalles o soporte, abre un issue o contribuye al proyecto. 

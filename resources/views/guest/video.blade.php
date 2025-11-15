@@ -5,7 +5,7 @@
         <div class="space-y-2">
             <p class="text-xs uppercase tracking-[0.3em] text-sage">Video boho</p>
             <h1 class="text-3xl font-semibold">Comparte un video</h1>
-            <p class="text-sm text-boho-brown/70">Captura momentos en movimiento y súbelos a la galería. Formatos permitidos: MP4 o MOV, máximo 50 MB.</p>
+            <p class="text-sm text-boho-brown/70">Captura momentos en movimiento y súbelos a la galería. Formatos permitidos: MP4 o MOV, máximo 256 MB.</p>
         </div>
 
         <form id="video-form" action="{{ route('guest.video.store', ['guestSlug' => $settings->guest_url_slug]) }}" method="POST" enctype="multipart/form-data" class="space-y-4">

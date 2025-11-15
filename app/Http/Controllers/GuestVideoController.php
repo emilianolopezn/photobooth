@@ -29,7 +29,7 @@ class GuestVideoController extends Controller
         abort_unless($guestSlug === $settings->guest_url_slug, 404);
 
         $validated = $request->validate([
-            'video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime', 'max:51200'],
+            'video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime', 'max:262144'],
             'thumbnail_data' => ['nullable', 'string'],
         ]);
 

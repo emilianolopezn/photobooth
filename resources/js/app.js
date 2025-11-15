@@ -623,6 +623,7 @@ function initGuestVideoUploader() {
 
     let currentFile = null;
     let currentUrl = null;
+    const MAX_VIDEO_SIZE = 256 * 1024 * 1024; // 256 MB
 
     const resetPreview = () => {
         preview?.classList.add('hidden');
@@ -646,6 +647,12 @@ function initGuestVideoUploader() {
 
         if (!['video/mp4', 'video/quicktime'].includes(file.type)) {
             showToast('Formato de video no soportado');
+            resetPreview();
+            return;
+        }
+
+        if (file.size > MAX_VIDEO_SIZE) {
+            showToast('El video debe pesar menos de 256 MB');
             resetPreview();
             return;
         }
@@ -780,6 +787,9 @@ function initGuestVideoUploader() {
                         .flat()
                         .join(' ');
                     showToast(errors || 'Error al subir video.');
+                    resetUploadState();
+                } else if (request.status === 413) {
+                    showToast('El video es demasiado grande. Máximo 256 MB.');
                     resetUploadState();
                 } else {
                     showToast('Algo salió mal al subir el video.');
